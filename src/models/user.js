@@ -1,3 +1,12 @@
+// Models help us to declare schema for the particular fields
+// 'User' is the collection name
+
+// npm i bcrypt > to encript the password in one way
+// harshal -> $1j$shvchvH -> harshal (2 way)
+// harshal -> $1j$shvchvH  (1 way)
+
+// npm i validator > to use readymade validator (ex: isEmail)
+
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
@@ -45,23 +54,21 @@ const userSchema = new mongoose.Schema(
     }
 )
 
+// syntax to use declared schema functions from routers page
 userSchema.statics.findByCredentials = async (email, password) => {
 
+    // get an object with the given email
     const user = await User.findOne({ email })
 
-    if(!user){
-        throw new Error('unable to login')
-    }
+    if(!user) throw new Error('unable to login')
 
-    console.log(password,user.password)
+    // compare password 
+    // 19Lpa@mean $2a$08$rs0erCneC7g3Ad80c74LIuWRA6roG.ckzHp9hTbP8wpEIRx.C8nii
+    // is true
 
     const isMatch = await bcrypt.compare(password, user.password)
 
-    console.log(isMatch)
-
-    if(!isMatch){
-        throw new Error('unable to login')  
-    }
+    if(!isMatch) throw new Error('unable to login')  
 
     return user
 }

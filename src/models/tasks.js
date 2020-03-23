@@ -1,6 +1,6 @@
+// Models help us to declare schema for the particular fields
+// 'taaskStats' is the collection name
 const mongoose = require('mongoose')
-const validator = require('validator')
-
 
 // INSERT Task Collection
 const TaskManager = mongoose.model('taaskStats', {
@@ -15,7 +15,5 @@ const TaskManager = mongoose.model('taaskStats', {
         default:false
     }
 }) 
-
-
 
 module.exports= TaskManager

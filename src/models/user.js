@@ -10,6 +10,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const userSchema = new mongoose.Schema(
     {
@@ -45,14 +46,28 @@ const userSchema = new mongoose.Schema(
             minlength: 7,
             trin: true,
             validate(val){
-                if(val.includes('password')){
+                if(val.toLowerCase().includes('password')){
                     throw new Error('Is not a proper password') 
                 }
                 
             }
-        }
+        },
+        tokens: [{
+            token: {
+                type: String,
+                required: true
+            }
+        }]
     }
 )
+
+userSchema.methods.generateAuthToken = async function (){
+    const user = this
+    const token = jwt.sign({ _id : user._id.toString()}, 'checktokens')  
+    user.tokens = user.tokens.concat({token})
+    await user.save()
+    return token
+}
 
 // syntax to use declared schema functions from routers page
 userSchema.statics.findByCredentials = async (email, password) => {
@@ -81,7 +96,7 @@ userSchema.pre('save', async function(){
         user.password = await bcrypt.hash(user.password, 8)
     }
         
-    // next()
+    next()
 })
 
 // INSERT User Data

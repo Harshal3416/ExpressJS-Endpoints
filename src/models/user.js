@@ -64,7 +64,13 @@ const userSchema = new mongoose.Schema(
 userSchema.methods.generateAuthToken = async function (){
     const user = this
     const token = jwt.sign({ _id : user._id.toString()}, 'checktokens')  
+
+    console.log(token)
+
     user.tokens = user.tokens.concat({token})
+
+    console.log(user)
+
     await user.save()
     return token
 }
@@ -96,7 +102,7 @@ userSchema.pre('save', async function(){
         user.password = await bcrypt.hash(user.password, 8)
     }
         
-    next()
+    // next()
 })
 
 // INSERT User Data

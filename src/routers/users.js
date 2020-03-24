@@ -1,17 +1,22 @@
 const express = require('express')
 const User = require('../models/user')
-
+const auth = require('../middleware/auth')
 const router = new express.Router()
 
 router.post('/users', async (req, res) => {
 
     const user = new User(req.body)
+
+    console.log(user)
     
-    try{
+    try{       
         await user.save()
-        res.status(201).send(user)
+        const token = await user.generateAuthToken()
+        console.log(token)
+        res.status(201).send({user, token})
     }
     catch(e){
+        console.log(e)
         res.status(400).send(e)
     }
 })
@@ -26,15 +31,18 @@ router.post('/users/login', async (req, res) => {
     }
 })
 
-router.get('/users', async (req, res)=>{
+// when a get call is made with /users, auth function is called and executed
+// 3rd parameter will be executed only if the next() is called from auth function
+router.get('/users/me', auth, async (req, res)=>{
  
-    try{
-        const user = await User.find({})
-        res.send(user)
-    }
-    catch(e){
-        res.status(500).send(e)
-    }
+    res.send(req.user)
+    // try{
+    //     const user = await User.find({})
+    //     res.send(user)
+    // }
+    // catch(e){
+    //     res.status(500).send(e)
+    // }
 })
 
 router.get('/users/:id', async (req, res)=>{

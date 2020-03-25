@@ -31,6 +31,31 @@ router.post('/users/login', async (req, res) => {
     }
 })
 
+
+// to logout, just delete the token for the logged in user
+// Logged in user will be saved in req.user
+router.post('/user/logout', auth, async (req, res)=> {
+    try {
+        req.user.tokens = req.user.tokens.filter((token)=> {
+            return token.token !== req.token
+        })
+        await req.user.save()
+        res.send("logged out")
+    } catch (e) {
+        res.ststus(500).send(e)
+    }
+})
+
+// router.post('/users/logoutAll', auth, async (req, res)=>{
+//     try {
+//         req.user.tokens = []
+//         await req.user.save()
+//         res.send("logged out all")
+//     } catch (e) {
+//         res.status(500).send(e)
+//     }
+// })
+
 // when a get call is made with /users, auth function is called and executed
 // 3rd parameter will be executed only if the next() is called from auth function
 router.get('/users/me', auth, async (req, res)=>{

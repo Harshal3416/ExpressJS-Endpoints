@@ -46,21 +46,22 @@ router.post('/user/logout', auth, async (req, res)=> {
     }
 })
 
-// router.post('/users/logoutAll', auth, async (req, res)=>{
-//     try {
-//         req.user.tokens = []
-//         await req.user.save()
-//         res.send("logged out all")
-//     } catch (e) {
-//         res.status(500).send(e)
-//     }
-// })
+router.post('/users/logoutAll', auth, async (req, res)=>{
+    try {
+        req.user.tokens = []
+        await req.user.save()
+        res.send("logged out all")
+    } catch (e) {
+        res.status(500).send(e)
+    }
+})
 
 // when a get call is made with /users, auth function is called and executed
 // 3rd parameter will be executed only if the next() is called from auth function
 router.get('/users/me', auth, async (req, res)=>{
  
     res.send(req.user)
+    // As we can get the userdata from login, no need to find for the user again
     // try{
     //     const user = await User.find({})
     //     res.send(user)
@@ -70,23 +71,24 @@ router.get('/users/me', auth, async (req, res)=>{
     // }
 })
 
-router.get('/users/:id', async (req, res)=>{
-    const _id = req.params.id;
-    console.log(req.params)
+// A loggedin user should not be able to view other users details, so commented this function
+// router.get('/users/:id', async (req, res)=>{
+//     const _id = req.params.id;
+//     console.log(req.params)
 
-    try{
-        const user = await User.findById(_id)
-        if(!user){
-         return res.status(404).send()
-        }
-        res.send(user)
-    }
-    catch(e){
-        res.status(500).send(e)
-    }
-})
+//     try{
+//         const user = await User.findById(_id)
+//         if(!user){
+//          return res.status(404).send()
+//         }
+//         res.send(user)
+//     }
+//     catch(e){
+//         res.status(500).send(e)
+//     }
+// })
 
-router.patch('/users/:id', async (req, res)=>{
+router.patch('/users/me', auth, async (req, res)=>{
 
     const updates = Object.keys(req.body)
     const valid = ['name', 'age', 'email', 'password']
@@ -98,29 +100,34 @@ router.patch('/users/:id', async (req, res)=>{
 
     try {
 
-        const user = await User.findById(req.params.id)
+        // const user = await User.findById(req.params.id)
         
-        updates.forEach((up) => user[up] = req.body[up])
-        await user.save()
+        updates.forEach((up) => req.user[up] = req.body[up])
+        await req.user.save()
 
         // const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true})
-        if(!user){
-            return res.status(404).send()
-        }
-        res.send(user)
+        // if(!user){
+        //     return res.status(404).send()
+        // }
+        res.send(req.user)
     } catch (e) {
         console.log("error found", e)
         res.status(400).send(e)
     }
 })
 
-router.delete('/users/:id', async (req, res) => {
+// A user can delete his own account
+router.delete('/users/me', auth, async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.id)
-        if(!user){
-            return res.status(404).send()
-        }
-        res.send(user)
+        // const user = await User.findByIdAndDelete(req.user._id)
+        // if(!user){
+        //     return res.status(404).send()
+        // }
+
+        // --OR--
+
+        await req.user.remove()
+        res.send(req.user)
 
     } catch (e) {
         res.status(500).send(e)

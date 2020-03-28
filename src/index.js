@@ -37,6 +37,23 @@ const funcn = async () => {
 
 funcn()
 
+const Task = require('./models/tasks')
+const User = require('./models/user')
+
+const a = async() => {
+    // const task = await Task.findById('5e7f46672ee4a02de0dbe41b')
+    // console.log(task.owner)
+    // await task.populate('owner').execPopulate()
+    // console.log(task.owner.name)
+
+    
+    const user = await User.findById('5e7b6c4b72b018052027509c')
+    await user.populate('tasks').execPopulate()
+    console.log(user.tasks)
+}
+
+a()
+
 app.listen(port, ()=>{
     console.log("Server is running on port no: ", port)
 })

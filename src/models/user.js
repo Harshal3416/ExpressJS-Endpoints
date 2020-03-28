@@ -61,6 +61,12 @@ const userSchema = new mongoose.Schema(
     }
 )
 
+userSchema.virtual('tasks', {
+    ref: 'taaskStats',
+    localField: '_id',
+    foreignField: 'owner'
+})
+
 // For data security dont we can choose not to display password and tokens
 // Here we are just removing password and tokens fields
 // toJSON function will be called implicitly

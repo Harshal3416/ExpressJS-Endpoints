@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 
 // INSERT Task Collection
 const TaskManager = mongoose.model('taaskStats', {
-    name: {
+    description: {
         type: String,
         required: true,
         trim : true,
@@ -13,6 +13,11 @@ const TaskManager = mongoose.model('taaskStats', {
     status: {
         type: Boolean,
         default:false
+    },
+    owner:{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
     }
 }) 
 

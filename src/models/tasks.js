@@ -2,23 +2,29 @@
 // 'taaskStats' is the collection name
 const mongoose = require('mongoose')
 
-// INSERT Task Collection
-const TaskManager = mongoose.model('taaskStats', {
-    description: {
-        type: String,
-        required: true,
-        trim : true,
-
-    },
-    status: {
-        type: Boolean,
-        default:false
-    },
-    owner:{
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User'
+const taskSchema = new mongoose.Schema(
+    {
+        description: {
+            type: String,
+            required: true,
+            trim : true,
+    
+        },
+        status: {
+            type: Boolean,
+            default:false
+        },
+        owner:{
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User'
+        }
+    },{
+        timestamps: true
     }
-}) 
+)
+
+// INSERT Task Collection
+const TaskManager = mongoose.model('taaskStats', taskSchema) 
 
 module.exports= TaskManager

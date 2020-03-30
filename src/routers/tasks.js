@@ -20,11 +20,21 @@ router.post('/tasks', auth, async (req, res) => {
     }
 })
 
+// GET /tasks?completed=true
 router.get('/tasks', auth, async (req,res)=>{
+const match = {}
+console.log(req.query.completed)
+if(req.query.completed){
+    // req.query.completed always returns a string
+    // convert string into boolean value
+    match.completed = req.query.completed === 'true'
+}
 
     try {
-        await req.user.populate('tasks').execPopulate()      
-        console.log(req.user.tasks)  
+        await req.user.populate({
+            path: 'tasks',
+            match              
+        }).execPopulate()      
         res.send(req.user.tasks)
     } catch (e) {
         res.status(500).send(e)
@@ -51,7 +61,7 @@ router.get('/tasks/:id',auth, async (req,res)=>{
 
 router.patch('/tasks/:id', auth, async (req, res) => {
     const updates = Object.keys(req.body)
-    const valid = ['description', 'status']
+    const valid = ['description', 'completed']
     const isValid = updates.every((update) => valid.includes(update))
     if(!isValid){
         return res.status(400).send({error: "invalid"})

@@ -1,4 +1,5 @@
 const express = require('express')
+const multer = require('multer')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
 const router = new express.Router()
@@ -126,5 +127,51 @@ router.delete('/users/me', auth, async (req, res) => {
     }
 })
 
+const upload = multer({
+    
+    // dest: 'avatars', //path to save images
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb){
+
+        if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){
+            return cb(new Error('File must be a word'))
+        }
+
+        cb(undefined, true)
+    }
+})
+
+// upload.single() takes one parameter which is the key name and the value is file
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res)=>{
+    req.user.avatar = req.file.buffer
+    await req.user.save()
+    res.send('uploaded')
+}, (error, req, res, next) => {
+    res.status(400).send({error : error.message})
+})
+
+router.delete('/users/me/avatar', auth, upload.single('avatar'), async (req, res)=>{
+    req.user.avatar = undefined
+    await req.user.save()
+    res.send('uploaded')
+})
+
+router.get('/users/:id/avatar', async (req, res)=>{
+    console.log("avatar")
+    try {
+        const user = await User.findById(req.params.id)
+
+        if(!user || !user.avatar){
+            throw new Error()
+        }
+
+        res.set('Content-Type', 'image/jpg')
+        res.send(user.avatar)
+    } catch (e) {
+        res.status(404).send(e)
+    }
+})
 
 module.exports = router

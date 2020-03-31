@@ -37,22 +37,29 @@ const funcn = async () => {
 
 funcn()
 
-const Task = require('./models/tasks')
-const User = require('./models/user')
+const multer = require('multer')
 
-const a = async() => {
-    // const task = await Task.findById('5e7f46672ee4a02de0dbe41b')
-    // console.log(task.owner)
-    // await task.populate('owner').execPopulate()
-    // console.log(task.owner.name)
+const upload = multer({
+    dest: 'images',
+    limits: {
+        fileSize: 1000000
+    },
+    fileFilter(req, file, cb){
 
-    
-    // const user = await User.findById('5e7b6c4b72b018052027509c')
-    // await user.populate('tasks').execPopulate()
-    // console.log(user.tasks)
-}
+        if(!file.originalname.match(/\.(doc|docx)$/)){
+            return cb(new Error('File must be a word'))
+        }
 
-a()
+        cb(undefined, true)
+
+        // cb(new Error('File must be a PDF'))
+        // cb(undefined, true)
+        // cb(undefined, false)
+    }
+})
+app.post('/upload', upload.single('upload'), (req, res)=>{
+    res.send()
+})
 
 app.listen(port, ()=>{
     console.log("Server is running on port no: ", port)

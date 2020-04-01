@@ -58,7 +58,7 @@ router.post('/users/logoutAll', auth, async (req, res)=>{
     }
 })
 
-// when a get call is made with /users, auth function is called and executed
+// when a get call is made with /users/me, auth function is called and executed
 // 3rd parameter will be executed only if the next() is called from auth function
 router.get('/users/me', auth, async (req, res)=>{
  
@@ -113,13 +113,6 @@ router.patch('/users/me', auth, async (req, res)=>{
 // A user can delete his own account
 router.delete('/users/me', auth, async (req, res) => {
     try {
-        // const user = await User.findByIdAndDelete(req.user._id)
-        // if(!user){
-        //     return res.status(404).send()
-        // }
-
-        // --OR--
-
         await req.user.remove()
         res.send(req.user)
 
@@ -133,11 +126,13 @@ const upload = multer({
     // dest: 'avatars', //path to save images
     limits: {
         fileSize: 1000000
+        // 1MB
     },
     fileFilter(req, file, cb){
 
+        // checking for an image
         if(!file.originalname.match(/\.(jpg|jpeg|png)$/)){
-            return cb(new Error('File must be a word'))
+            return cb(new Error('File must be a Image'))
         }
 
         cb(undefined, true)
@@ -146,9 +141,9 @@ const upload = multer({
 
 // upload.single() takes one parameter which is the key name and the value is file
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res)=>{
+    // all the images will have a resolution of 250*250 and will be converted to PNG
     const buffer = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer()
     req.user.avatar = buffer
-    // req.user.avatar = req.file.buffer
     await req.user.save()
     res.send('uploaded')
 }, (error, req, res, next) => {
@@ -156,6 +151,7 @@ router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res)=
 })
 
 router.delete('/users/me/avatar', auth, upload.single('avatar'), async (req, res)=>{
+    // to delete the avatar, set avarar as undefined
     req.user.avatar = undefined
     await req.user.save()
     res.send('uploaded')
@@ -166,10 +162,12 @@ router.get('/users/:id/avatar', async (req, res)=>{
     try {
         const user = await User.findById(req.params.id)
 
+        // user doesn't exists or the user is not having avatar
         if(!user || !user.avatar){
             throw new Error()
         }
 
+        // setting as png because all the images are converted to png using SHARP
         res.set('Content-Type', 'image/png')
         res.send(user.avatar)
     } catch (e) {
